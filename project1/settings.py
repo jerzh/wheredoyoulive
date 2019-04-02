@@ -73,11 +73,21 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+# https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04
+# https://stackoverflow.com/questions/3602450/where-are-my-postgres-conf-files
+# https://stackoverflow.com/questions/11919391/postgresql-error-fatal-role-username-does-not-exist
+# https://stackoverflow.com/questions/21122598/postgres-user-does-not-exist
+# https://dba.stackexchange.com/questions/1285/how-do-i-list-all-databases-and-tables-using-psql
+# https://www.postgresql.org/docs/8.2/sql-dropdatabase.html
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'database',
+        'USER': 'databaseuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '8000',
     }
 }
 
