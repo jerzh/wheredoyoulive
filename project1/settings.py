@@ -82,11 +82,13 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # https://stackoverflow.com/questions/20198235/postgresql-could-not-create-any-tcp-ip-sockets-mavericks
 # https://stackoverflow.com/questions/7975414/how-to-check-status-of-postgresql-server-mac-os-x
 # https://superuser.com/questions/553045/fatal-lock-file-postmaster-pid-already-exists
+# https://stackoverflow.com/questions/5598517/find-the-host-name-and-port-using-psql-commands
+# https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
+# https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
 
 # pg_ctl -D /usr/local/var/postgres start
 # ok so I figured it out: what you need to do is run the above command and
 # create the database "database" etc per the instructions of the second link ^
-# the error I was having was because I set the PORT to 8000 instead of 5432 ._.
 
 DATABASES = {
     'default': {
