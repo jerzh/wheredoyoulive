@@ -79,6 +79,14 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # https://stackoverflow.com/questions/21122598/postgres-user-does-not-exist
 # https://dba.stackexchange.com/questions/1285/how-do-i-list-all-databases-and-tables-using-psql
 # https://www.postgresql.org/docs/8.2/sql-dropdatabase.html
+# https://stackoverflow.com/questions/20198235/postgresql-could-not-create-any-tcp-ip-sockets-mavericks
+# https://stackoverflow.com/questions/7975414/how-to-check-status-of-postgresql-server-mac-os-x
+# https://superuser.com/questions/553045/fatal-lock-file-postmaster-pid-already-exists
+
+# pg_ctl -D /usr/local/var/postgres start
+# ok so I figured it out: what you need to do is run the above command and
+# create the database "database" etc per the instructions of the second link ^
+# the error I was having was because I set the PORT to 8000 instead of 5432 ._.
 
 DATABASES = {
     'default': {
@@ -87,7 +95,7 @@ DATABASES = {
         'USER': 'databaseuser',
         'PASSWORD': 'password',
         'HOST': 'localhost',
-        'PORT': '8000',
+        'PORT': '5432',
     }
 }
 
