@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -85,20 +86,26 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # https://stackoverflow.com/questions/5598517/find-the-host-name-and-port-using-psql-commands
 # https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
 # https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
+# https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
 
+# instructions:
+# > install postgres, psycopg2, dj_database_url
 # pg_ctl -D /usr/local/var/postgres start
-# ok so I figured it out: what you need to do is run the above command and
-# create the database "database" etc per the instructions of the second link ^
+# createdb database
+# psql database
+# > your prompt should now be database=#
+# CREATE USER databaseuser WITH PASSWORD 'password';
+# ALTER ROLE databaseuser SET client_encoding TO 'utf8';
+# ALTER ROLE databaseuser SET default_transaction_isolation TO 'read committed';
+# ALTER ROLE databaseuser SET timezone TO 'UTC';
+# GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
+# \q
+# > set the environment variable DATABASE_URL to postgres://database
+# (it's different for Windows and Mac)
+# > now python manage.py runserver should be good! yay
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'database',
-        'USER': 'databaseuser',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
 }
 
 
