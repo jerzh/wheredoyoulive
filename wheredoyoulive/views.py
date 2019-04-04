@@ -29,37 +29,70 @@ def index(request):
     return render(request, 'wheredoyoulive/homepage.html', \
         {'form': form, \
         'make': reverse('wheredoyoulive:make'), \
-        'user_index': reverse('wheredoyoulive:index')})
+        'index': reverse('wheredoyoulive:index')})
 
 
 def make(request):
-    form = CreateForm()
-    return render(request, 'wheredoyoulive/FormPage.html', \
-    {'form': form, \
-    'page': })
+    if request.method == 'POST':
+        form = CreateForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            if (User.objects.filter(username=username)):
+                return render(request, 'wheredoyoulive/ErrorPage.html', \
+                    {'error_name': 'Username already taken', \
+                    'index': reverse('wheredoyoulive:index')})
+            else:
+                u = User(username=username, latitude=0, longitude=0)
+                u.save()
+                return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
+                    args=(username,)))
+    else:
+        form = CreateForm()
+        return render(request, 'wheredoyoulive/FormPage.html', \
+            {'form': form, \
+            'page': reverse('wheredoyoulive:make')})
 
 
 def user_index(request, username):
     if (User.objects.filter(username=username)):
-        u = User(username=username, latitude=0, longitude=0)
-        u.save()
+        u = User.objects.get(username=username)
         return render(request, 'wheredoyoulive/userpage.html', \
             {'username': username, \
             'name': u.name, \
             'latitude': u.latitude, \
             'longitude': u.longitude, \
             'update': reverse('wheredoyoulive:update', args=(username,)), \
-            'delete': reverse('wheredoyoulive:delete'), \
-            'add_poi': reverse('wheredoyoulive:add_poi'), \
-            'remove_poi': reverse('wheredoyoulive:rm_poi')})
+            'delete': reverse('wheredoyoulive:delete', args=(username,)), \
+            'add_poi': reverse('wheredoyoulive:add_poi', args=(username,)), \
+            'remove_poi': reverse('wheredoyoulive:rm_poi', args=(username,))})
     else:
-        return HttpResponse('you\'re bad')
+        return render(request, 'wheredoyoulive/ErrorPage.html', \
+            {'error_name': 'User does not exist', \
+            'index': reverse('wheredoyoulive:index')})
 
 
 def update(request, username):
-    return render(request, 'wheredoyoulive/FormPage.html', \
-        {'form': form, \
-        'page': reverse('wheredoyoulive:user_index')})
+    if (User.objects.filter(username=username)):
+        u = User.objects.get(username=username)
+        if request.method == 'POST':
+            form = UpdateForm(request.POST)
+            if form.is_valid():
+                u.name = form.cleaned_data['name']
+                u.latitude = form.cleaned_data['latitude']
+                u.longitude = form.cleaned_data['longitude']
+                u.save()
+                return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
+                    args=(username,)))
+        else:
+            form = UpdateForm()
+            return render(request, 'wheredoyoulive/FormPage.html', \
+                {'form': form, \
+                'page': reverse('wheredoyoulive:update', args=(username,))})
+    else:
+        return render(request, 'wheredoyoulive/ErrorPage.html', \
+            {'error_name': 'User does not exist', \
+            'index': reverse('wheredoyoulive:index')})
+
 
 
 def delete(request, username):
