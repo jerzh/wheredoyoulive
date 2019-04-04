@@ -9,6 +9,7 @@ from .forms import CreateForm, LoginForm, UpdateForm
 # https://docs.djangoproject.com/en/2.1/topics/templates/
 # https://stackoverflow.com/questions/53083880/django-2-reverse-for-index-not-found-index-is-not-a-valid-view-function-o
 # https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+# https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objects
 
 
 def index(request):
