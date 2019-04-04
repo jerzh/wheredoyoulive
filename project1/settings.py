@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+# https://stackoverflow.com/questions/17688594/how-to-diff-between-local-uncommitted-changes-and-origin
+
 import os
 import dj_database_url
 
@@ -87,6 +89,9 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
 # https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
 # https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
+# https://stackoverflow.com/questions/3582552/postgresql-connection-url
+# https://stackoverflow.com/questions/30897442/django-1-8-fails-to-django-db-utils-programmingerror-relation-auth-user-does
+# https://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git
 
 # instructions:
 # > install postgres, psycopg2, dj_database_url
@@ -100,12 +105,12 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # ALTER ROLE databaseuser SET timezone TO 'UTC';
 # GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
 # \q
-# > set the environment variable DATABASE_URL to postgres://database
+# > set the environment variable DATABASE_URL to postgres://localhost/database
 # (it's different for Windows and Mac)
 # > now python manage.py runserver should be good! yay
 
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=True)
+    'default': dj_database_url.config(conn_max_age=600, ssl_require=False)
 }
 
 
