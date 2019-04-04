@@ -1,17 +1,16 @@
-<!DOCTYPE html>
-<html>
-<head></head>
-<body>
-  <div id="center">
-    <div class="flex-container">
-      <a href="make_user" id="createuser" class="button">
-        <div class="text"><p> Create a new User </p></div>
-      </a>
-      <form action="username" method="post">
-        {{ form }}
-        <input type="Submit" value= "Login">
-      </form>
-    </div>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'polls/homepage.css' %}">
+
+<div id="center">
+  <div class="flex-container">
+    <a href="{{ make }}" id="createuser" class="button">
+      <div class="text"><p> Create a new User </p></div>
+    </a>
+    <form action="{{ index }}" method="post">
+      {% csrf_token %}
+      {{ form }}
+      <input type="Submit" value= "Login">
+    </form>
   </div>
-</body>
-</html>
+</div>
