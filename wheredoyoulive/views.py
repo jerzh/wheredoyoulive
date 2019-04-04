@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Places
-from .forms import CreateForm, LoginForm, UpdateForm
+from .forms import CreateForm, LoginForm, UpdateForm, AddPOIForm, RemovePOIForm
 
 # https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
 # https://docs.djangoproject.com/en/2.1/topics/templates/
@@ -32,38 +32,34 @@ def index(request):
         'user_index': reverse('wheredoyoulive:index')})
 
 
+def make(request):
+    form = CreateForm()
+    return render(request, 'wheredoyoulive/FormPage.html', \
+    {'form': form, \
+    'page': })
+
+
 def user_index(request, username):
     if (User.objects.filter(username=username)):
-        return render()
-    else:
         u = User(username=username, latitude=0, longitude=0)
         u.save()
         return render(request, 'wheredoyoulive/userpage.html', \
-        {'username': u.username, \
-        'name': u.name, \
-        'latitude': u.latitude, \
-        'longitude': u.longitude, \
-        'update': reverse('wheredoyoulive:update')})
-
-
-def make(request):
-    return HttpResponse('make')
-
-
-# def make_info(request, dname, uname, lat, long):
-#     u = User(name=dname, username=uname, latitude=lat, longitude=long)
-#     u.save()
-#     # return HttpResponse('Made %s' % username)
-#     return HttpResponseRedirect('')
+            {'username': username, \
+            'name': u.name, \
+            'latitude': u.latitude, \
+            'longitude': u.longitude, \
+            'update': reverse('wheredoyoulive:update', args=(username,)), \
+            'delete': reverse('wheredoyoulive:delete'), \
+            'add_poi': reverse('wheredoyoulive:add_poi'), \
+            'remove_poi': reverse('wheredoyoulive:rm_poi')})
+    else:
+        return HttpResponse('you\'re bad')
 
 
 def update(request, username):
-    return HttpResponse('update')
-
-
-# def update_info(request, dname, uname, lat, long):
-#     u = User.objects.get(username=uname)
-#     u.update(name=dname, latitude=lat, longitude=long)
+    return render(request, 'wheredoyoulive/FormPage.html', \
+        {'form': form, \
+        'page': reverse('wheredoyoulive:user_index')})
 
 
 def delete(request, username):
