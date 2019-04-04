@@ -1,13 +1,13 @@
 {% load static %}
 
-<link rel="stylesheet" type="text/css" href="{% static 'polls/homepage.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'wheredoyoulive/homepage.css' %}">
 
 <div id="center">
   <div class="flex-container">
     <a href="{{ make }}" id="createuser" class="button">
       <div class="text"><p> Create a new User </p></div>
     </a>
-    <form action="{{ index }}" method="post">
+    <form action="{{ user_index }}" method="post">
       {% csrf_token %}
       {{ form }}
       <input type="Submit" value= "Login">
