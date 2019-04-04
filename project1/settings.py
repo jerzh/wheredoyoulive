@@ -105,8 +105,8 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 # ALTER ROLE databaseuser SET timezone TO 'UTC';
 # GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
 # \q
-# > set the environment variable DATABASE_URL to postgres://localhost/database
-# (it's different for Windows and Mac)
+# > set the environment variable DATABASE_URL to
+# postgres://databaseuser:password@localhost:5432/database
 # > now python manage.py runserver should be good! yay
 
 DATABASES = {
