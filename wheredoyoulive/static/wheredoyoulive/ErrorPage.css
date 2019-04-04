@@ -1,0 +1,25 @@
+body {
+  font-family: "Helvetica Neue", sans-serif;
+  background-color:#d5e1df;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+#center {
+  width: 800px;
+  background-color: #e3eaa7;
+  margin-top: 100px;
+  display: inline-block;
+  border-radius: 5px;
+  box-shadow: 1px 1px 10px #888888;
+}
+
+.text {
+  margin: 20px;
+  color: black;
+}
+
+button {
+  margin-bottom: 20px;
+}

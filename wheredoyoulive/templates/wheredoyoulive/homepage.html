@@ -7,10 +7,10 @@
     <a href="{{ make }}" id="createuser" class="button">
       <div class="text"><p> Create a new User </p></div>
     </a>
-    <form action="{{ user_index }}" method="post">
+    <form action="{{ index }}" method="post">
       {% csrf_token %}
       {{ form }}
-      <input type="Submit" value= "Login">
+      <input type="Submit" value="Login">
     </form>
   </div>
 </div>
