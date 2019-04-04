@@ -8,6 +8,7 @@ from .forms import CreateForm, LoginForm, UpdateForm
 # https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
 # https://docs.djangoproject.com/en/2.1/topics/templates/
 # https://stackoverflow.com/questions/53083880/django-2-reverse-for-index-not-found-index-is-not-a-valid-view-function-o
+# https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objects
 
 def index(request):
     # if this is a POST request we need to process the form data
