@@ -8,6 +8,7 @@ from .forms import CreateForm, LoginForm, UpdateForm
 # https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
 # https://docs.djangoproject.com/en/2.1/topics/templates/
 # https://stackoverflow.com/questions/53083880/django-2-reverse-for-index-not-found-index-is-not-a-valid-view-function-o
+# https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
 
 
 def index(request):
@@ -24,13 +25,24 @@ def index(request):
     # if a GET (or any other method) we'll create a blank form
     else:
         form = LoginForm()
-    return render(request, 'wheredoyoulive/homepage.html', {'form': form, \
-        'make': reverse('wheredoyoulive:make'), 'user_index': \
-        reverse('wheredoyoulive:index')})
+    return render(request, 'wheredoyoulive/homepage.html', \
+        {'form': form, \
+        'make': reverse('wheredoyoulive:make'), \
+        'user_index': reverse('wheredoyoulive:index')})
 
 
 def user_index(request, username):
-    return HttpResponse('User homepage: %s' % username)
+    if (User.objects.filter(username=username)):
+        return render()
+    else:
+        u = User(username=username, latitude=0, longitude=0)
+        u.save()
+        return render(request, 'wheredoyoulive/userpage.html', \
+        {'username': u.username, \
+        'name': u.name, \
+        'latitude': u.latitude, \
+        'longitude': u.longitude, \
+        'update': reverse('wheredoyoulive:update')})
 
 
 def make(request):
@@ -44,7 +56,7 @@ def make(request):
 #     return HttpResponseRedirect('')
 
 
-def update(request):
+def update(request, username):
     return HttpResponse('update')
 
 
@@ -57,3 +69,11 @@ def delete(request, username):
     u = User.objects.get(username=username)
     u.delete()
     return HttpResponseRedirect(reverse('wheredoyoulive:index'))
+
+
+def add_poi(request, username):
+    return HttpResponse('addpoi')
+
+
+def rm_poi(request, username):
+    return HttpResponse('rmpoi')
