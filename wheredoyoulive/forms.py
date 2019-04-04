@@ -19,10 +19,11 @@ class UpdateForm(forms.Form):
 
 
 class AddPOIForm(forms.Form):
-    user_id = forms.CharField(label='User ID', max_length=100)
+    #user_id = forms.CharField(label='User ID', max_length=100)
     title = forms.CharField(label='Title', max_length=100)
-    coordinate_lat = forms.IntegerField(label='Latitude')
-    coordinate_long = forms.IntegerField(label='Longitude')
+    address = forms.CharField(label='Address', max_length=100)
+    #coordinate_lat = forms.IntegerField(label='Latitude')
+    #coordinate_long = forms.IntegerField(label='Longitude')
 
 
 class RemovePOIForm(forms.Form):
