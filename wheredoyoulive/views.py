@@ -1,4 +1,5 @@
 # Still need to replace ADDKEY with key in AddPOI. I also have some questions in AddPOI
+#Also should we add ability to set home right when a user is made instead of making them update it
 
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -44,16 +45,19 @@ def show_users(request):
     uList = list(User.objects.all().values())
     return JsonResponse(uList, safe=False)
 
+#Makes new user
 def make(request):
     if request.method == 'POST':
         form = CreateForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
+            #Makes sure username not already taken
             if (User.objects.filter(username=username)):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                     {'error_name': 'Username already taken', \
                     'index': reverse('wheredoyoulive:index')})
             else:
+                #Initializes home location to (0, 0), have to update this
                 u = User(username=username, latitude=0, longitude=0)
                 u.save()
                 return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
@@ -64,7 +68,7 @@ def make(request):
             {'form': form, \
             'page': reverse('wheredoyoulive:make')})
 
-
+#Homepage for a user, has links to many useful features
 def user_index(request, username):
     if (User.objects.filter(username=username)):
         u = User.objects.get(username=username)
@@ -154,8 +158,7 @@ def rm_poi(request, username):
     if request.method == 'POST':
         form = RemovePOIForm(request.POST)
         if form.is_valid():
-            u = User(username=username)
-            p = Places.objects.get(user_id=u.id, title=form['title'])
+            p = Places.objects.get(user_id=User(username=username).id, title=form['title'])
             p.delete()
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                 args=(form.cleaned_data['username'],)))
@@ -165,18 +168,20 @@ def rm_poi(request, username):
         {'form': form, \
         'index': reverse('wheredoyoulive:rm_poi')})
 
-#Updates POI (basically deletes old one and makes a new one, same as updating fields)
+#Updates POI (basically deletes old one and makes a new one, same as updating fields, so a lot is copied from add_poi)
 def upd_poi(request, username):
     u = User.objects.get(username=username)
     if request.method == 'POST':
         form = AddPOIForm(request.POST)
         if form.is_valid():
+            #Checks to make sure poi actually exists
             if not (Places.objects.filter(user_id=u.id, title=form['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                               {'error_name': 'No such POI exists', \
                                'index': reverse('wheredoyoulive:index')})
             p1 = Places.objects.get(user_id=u.id, title=form['title'])
             p1.delete()
+            #Everything after here is straight from add_poi
             address = form['address'].replace(' ', '+')  # Changes address into form url query can understand
             # Next part gets Json info from google API
             url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=ADDKEY' % address  # Replace ADDKEY with key
