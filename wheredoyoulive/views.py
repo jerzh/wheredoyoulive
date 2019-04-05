@@ -39,6 +39,10 @@ def index(request):
         'make': reverse('wheredoyoulive:make'), \
         'index': reverse('wheredoyoulive:index')})
 
+#Shows all users
+def show_users(request):
+    uList = list(User.objects.all().values())
+    return JsonResponse(uList, safe=False)
 
 def make(request):
     if request.method == 'POST':
@@ -106,6 +110,11 @@ def delete(request, username):
     u = User.objects.get(username=username)
     u.delete()
     return HttpResponseRedirect(reverse('wheredoyoulive:index'))
+
+#Shows all POIs (POI stands for Point of Interest)
+def show_pois(request):
+    pList = list(Places.objects.all().values())
+    return JsonResponse(pList, safe=False)
 
 #Gets all POIs for a user
 def poi(request, username):
