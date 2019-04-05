@@ -1,0 +1,20 @@
+How to Navigate Webpage:
+
+1. The homepage
+It has two options: a "create user" button that redirects to a form
+which creates a new user and adds it to the database, and a "login" form
+which takes a username and then redirects to said user's page. This works
+with a postgres database of all users, which you can view by manually 
+going to /users. You can also access a master list of all POI's by going
+to /pois.
+
+2. Once you create a user and login
+You will see an html page with your data and six buttons underneath. The
+first two buttons interact with the user's data, allowing you to edit your
+data or delete your account.
+
+3. The other four buttons
+Allow for interaction with POI's. You can add a POI, remove a POI, edit a POI
+or view your current POI. The first three use forms to collect input data
+from the user and update the database accordingly, whereas viewing your POI
+just pulls up a list of the POI's for your user without requiring an input.
