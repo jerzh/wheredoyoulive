@@ -1,9 +1,12 @@
+# Still need to replace ADDKEY with key in AddPOI. I also have some questions in AddPOI
+
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Places
 from .forms import CreateForm, LoginForm, UpdateForm, AddPOIForm, RemovePOIForm
+import urllib.request, json
 import urllib, json
 
 # https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
@@ -109,20 +112,40 @@ def add_poi(request, username):
     if request.method == 'POST':
         form = AddPOIForm(request.POST)
         if form.is_valid():
-            address = form['Address'].replace(' ', '+')
-            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=#AddKey' % address
-
-            p = Place(user_id=u.id, title=form.cleaned_data['title'], )
-            #return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
-            #    args=(form.cleaned_data['username'],)))
+            #Checks to see if place with same name for same user already exists, error if it does
+            if (Places.objects.filter(user_id=u.id, title=form['title'])): #Do I need form.cleaned_data['title']
+                return render(request, 'wheredoyoulive/ErrorPage.html', \
+                    {'error_name': 'Title already taken for this user', \
+                    'index': reverse('wheredoyoulive:index')}) #Should I change where error redirects?
+            address = form['address'].replace(' ', '+') #Changes address into form url query can understand
+            #Next part gets Json info from google API
+            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=ADDKEY' % address #Replace ADDKEY with key
+            data = json.loads(urllib.request.urlopen(url).read())
+            coords = data["results"][0]["geometry"]["location"] #Uses format of json response to get info
+            #Makes and saves a new place object
+            p = Place(user_id=u.id, title=form.cleaned_data['title'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
+            p.save()
+            #Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
+            return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
+                args=(form.cleaned_data['username'],)))
     else:
         form = AddPOIForm()
     return render(request, 'wheredoyoulive/FormPage.html', \
         {'form': form, \
          'page': reverse('wheredoyoulive:add_poi')})
-    #return HttpResponse('addpoi')
-    #Can you add the page with the button to home here?
 
 
 def rm_poi(request, username):
-    return HttpResponse('rmpoi')
+    if request.method == 'POST':
+        form = RemovePOIForm(request.POST)
+        if form.is_valid():
+            u = User(username=username)
+            p = Places.objects.get(user_id=u.id, title=form['title'])
+            p.delete()
+            return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
+                args=(form.cleaned_data['username'],)))
+    else:
+        form = RemovePOIForm()
+    return render(request, 'wheredoyoulive/FormPage.html', \
+        {'form': form, \
+        'index': reverse('wheredoyoulive:rm_poi')})
