@@ -164,3 +164,33 @@ def rm_poi(request, username):
     return render(request, 'wheredoyoulive/FormPage.html', \
         {'form': form, \
         'index': reverse('wheredoyoulive:rm_poi')})
+
+#Updates POI (basically deletes old one and makes a new one, same as updating fields)
+def upd_poi(request, username):
+    u = User.objects.get(username=username)
+    if request.method == 'POST':
+        form = AddPOIForm(request.POST)
+        if form.is_valid():
+            if not (Places.objects.filter(user_id=u.id, title=form['title'])):
+                return render(request, 'wheredoyoulive/ErrorPage.html', \
+                              {'error_name': 'No such POI exists', \
+                               'index': reverse('wheredoyoulive:index')})
+            p1 = Places.objects.get(user_id=u.id, title=form['title'])
+            p1.delete()
+            address = form['address'].replace(' ', '+')  # Changes address into form url query can understand
+            # Next part gets Json info from google API
+            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=ADDKEY' % address  # Replace ADDKEY with key
+            data = json.loads(urllib.request.urlopen(url).read())
+            coords = data["results"][0]["geometry"]["location"]  # Uses format of json response to get info
+            # Makes and saves a new place object
+            p = Place(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'],
+                      coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
+            p.save()
+            # Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
+            return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
+                                                args=(form.cleaned_data['username'],)))
+    else:
+        form = AddPOIForm()
+    return render(request, 'wheredoyoulive/FormPage.html', \
+                  {'form': form, \
+                   'page': reverse('wheredoyoulive:add_poi')})
