@@ -1,0 +1,22 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'wheredoyoulive/listpage.css' %}">
+
+<div id="center">
+  <div class="flex-container">
+    <div id="poilist">
+      {% if obj_list %}
+          <ul>
+          {% for obj in obj_list %}
+              <li> {{ obj }} </li>
+          {% endfor %}
+          </ul>
+      {% else %}
+          <p>This list is empty.</p>
+      {% endif %}
+    </div>
+    <a href="{{ index }}" id="createuser" class="button">
+      <div class="text"><p> Back </p></div>
+    </a>
+  </div>
+</div>

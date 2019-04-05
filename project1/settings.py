@@ -75,39 +75,41 @@ WSGI_APPLICATION = 'project1.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
-# https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04
-# https://stackoverflow.com/questions/3602450/where-are-my-postgres-conf-files
-# https://stackoverflow.com/questions/11919391/postgresql-error-fatal-role-username-does-not-exist
-# https://stackoverflow.com/questions/21122598/postgres-user-does-not-exist
-# https://dba.stackexchange.com/questions/1285/how-do-i-list-all-databases-and-tables-using-psql
-# https://www.postgresql.org/docs/8.2/sql-dropdatabase.html
-# https://stackoverflow.com/questions/20198235/postgresql-could-not-create-any-tcp-ip-sockets-mavericks
-# https://stackoverflow.com/questions/7975414/how-to-check-status-of-postgresql-server-mac-os-x
-# https://superuser.com/questions/553045/fatal-lock-file-postmaster-pid-already-exists
-# https://stackoverflow.com/questions/5598517/find-the-host-name-and-port-using-psql-commands
-# https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
-# https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
-# https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
-# https://stackoverflow.com/questions/3582552/postgresql-connection-url
-# https://stackoverflow.com/questions/30897442/django-1-8-fails-to-django-db-utils-programmingerror-relation-auth-user-does
-# https://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git
+''' Sources to get postgres to work:
+https://docs.djangoproject.com/en/2.1/ref/settings/#databases
+https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-your-django-application-on-ubuntu-14-04
+https://stackoverflow.com/questions/3602450/where-are-my-postgres-conf-files
+https://stackoverflow.com/questions/11919391/postgresql-error-fatal-role-username-does-not-exist
+https://stackoverflow.com/questions/21122598/postgres-user-does-not-exist
+https://dba.stackexchange.com/questions/1285/how-do-i-list-all-databases-and-tables-using-psql
+https://www.postgresql.org/docs/8.2/sql-dropdatabase.html
+https://stackoverflow.com/questions/20198235/postgresql-could-not-create-any-tcp-ip-sockets-mavericks
+https://stackoverflow.com/questions/7975414/how-to-check-status-of-postgresql-server-mac-os-x
+https://superuser.com/questions/553045/fatal-lock-file-postmaster-pid-already-exists
+https://stackoverflow.com/questions/5598517/find-the-host-name-and-port-using-psql-commands
+https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
+https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
+https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
+https://stackoverflow.com/questions/3582552/postgresql-connection-url
+https://stackoverflow.com/questions/30897442/django-1-8-fails-to-django-db-utils-programmingerror-relation-auth-user-does
+https://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git
 
-# instructions:
-# > install postgres, psycopg2, dj_database_url
-# pg_ctl -D /usr/local/var/postgres start
-# createdb database
-# psql database
-# > your prompt should now be database=#
-# CREATE USER databaseuser WITH PASSWORD 'password';
-# ALTER ROLE databaseuser SET client_encoding TO 'utf8';
-# ALTER ROLE databaseuser SET default_transaction_isolation TO 'read committed';
-# ALTER ROLE databaseuser SET timezone TO 'UTC';
-# GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
-# \q
-# > set the environment variable DATABASE_URL to
-# postgres://databaseuser:password@localhost:5432/database
-# > now python manage.py runserver should be good! yay
+instructions:
+> install postgres, psycopg2, dj_database_url
+pg_ctl -D /usr/local/var/postgres start
+createdb database
+psql database
+> your prompt should now be database=#
+CREATE USER databaseuser WITH PASSWORD 'password';
+ALTER ROLE databaseuser SET client_encoding TO 'utf8';
+ALTER ROLE databaseuser SET default_transaction_isolation TO 'read committed';
+ALTER ROLE databaseuser SET timezone TO 'UTC';
+GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
+\q
+> set the environment variable DATABASE_URL to
+postgres://databaseuser:password@localhost:5432/database
+> now python manage.py runserver should be good! yay
+'''
 
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=600, ssl_require=False)

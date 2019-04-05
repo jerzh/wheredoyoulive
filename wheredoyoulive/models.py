@@ -10,7 +10,7 @@ class User(models.Model):
     latitude = models.CharField(max_length=100)
     longitude = models.CharField(max_length=100)
     def __str__(self):
-        return self.username
+        return self.values()
 
 
 class Places(models.Model):
@@ -19,3 +19,5 @@ class Places(models.Model):
     address = models.CharField(max_length=100)
     coordinate_lat = models.CharField(max_length=100)
     coordinate_long = models.CharField(max_length=100)
+    def __str__(self):
+        return self.values()

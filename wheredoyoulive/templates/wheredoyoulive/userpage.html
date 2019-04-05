@@ -4,9 +4,9 @@
 
 <div id="center">
   <div id="display">
-    <p>Welcome {{ name }}!</p>
-    <p>Username: {{ username }}</p>
-    <p>Homebase: {{ latitude }}, {{ longitude }}</p>
+    <p>Welcome {{username}}!</p>
+    <p>User id: {{user_id}}</p>
+    <p>Homebase: {{latitude}}, {{longitude}}</p>
   </div>
   <div class="flex-container">
     <a href="{{ update }}" class="button">
@@ -20,6 +20,12 @@
     </a>
     <a href="{{ remove_poi }}" class="button">
       <div class="text"><p> Remove POI </p></div>
+    </a>
+    <a href="{{ view_poi }}" class="button">
+      <div class="text"><p> View POI </p></div>
+    </a>
+    <a href="{{ update_poi }}" class="button">
+      <div class="text"><p> Update POI </p></div>
     </a>
   </div>
 </div>

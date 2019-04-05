@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from .models import User, Places
 from .forms import CreateForm, LoginForm, UpdateForm, AddPOIForm, RemovePOIForm
-import urllib.request, json
+import urllib.request
 import urllib, json
 
 '''Sources used:
@@ -19,6 +19,8 @@ https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objec
 https://developers.google.com/maps/documentation/geocoding/intro#geocoding
 https://www.powercms.in/blog/how-get-json-data-remote-url-python-script
 https://simpleisbetterthancomplex.com/tutorial/2016/07/27/how-to-return-json-encoded-response.html
+https://stackoverflow.com/questions/20168582/programmingerror-column-genre-id-of-relation-music-album-does-not-exist-w
+https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 
 def index(request):
@@ -43,7 +45,9 @@ def index(request):
 #Shows all users
 def show_users(request):
     uList = list(User.objects.all().values())
-    return JsonResponse(uList, safe=False)
+    return render(request, 'wheredoyoulive/listpage.html', \
+        {'obj_list': uList, \
+        'index': reverse('wheredoyoulive:index')})
 
 #Makes new user
 def make(request):
@@ -58,7 +62,9 @@ def make(request):
                     'index': reverse('wheredoyoulive:index')})
             else:
                 #Initializes home location to (0, 0), have to update this
-                u = User(username=username, latitude=0, longitude=0)
+                u = User(username=username, name=form.cleaned_data['name'], \
+                    latitude=form.cleaned_data['latitude'], \
+                    longitude=form.cleaned_data['longitude'])
                 u.save()
                 return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                     args=(username,)))
@@ -80,7 +86,9 @@ def user_index(request, username):
             'update': reverse('wheredoyoulive:update', args=(username,)), \
             'delete': reverse('wheredoyoulive:delete', args=(username,)), \
             'add_poi': reverse('wheredoyoulive:add_poi', args=(username,)), \
-            'remove_poi': reverse('wheredoyoulive:rm_poi', args=(username,))})
+            'remove_poi': reverse('wheredoyoulive:rm_poi', args=(username,)), \
+            'view_poi': reverse('wheredoyoulive:poi', args=(username,)), \
+            'update_poi': reverse('wheredoyoulive:upd_poi', args=(username,))})
     else:
         return render(request, 'wheredoyoulive/ErrorPage.html', \
             {'error_name': 'User does not exist', \
@@ -118,12 +126,16 @@ def delete(request, username):
 #Shows all POIs (POI stands for Point of Interest)
 def show_pois(request):
     pList = list(Places.objects.all().values())
-    return JsonResponse(pList, safe=False)
+    return render(request, 'wheredoyoulive/listpage.html', \
+        {'obj_list': pList, \
+        'index': reverse('wheredoyoulive:index')})
 
 #Gets all POIs for a user
 def poi(request, username):
-    pList = list(Places.object.filter(user_id=User.objects.get(username=username).id))
-    return JsonResponse(pList, safe=False)
+    pList = list(Places.objects.filter(user_id=User.objects.get(username=username).id).values())
+    return render(request, 'wheredoyoulive/listpage.html', \
+        {'obj_list': pList, \
+        'index': reverse('wheredoyoulive:user_index', args=(username,))})
 
 #Adds POI
 def add_poi(request, username):
@@ -132,41 +144,42 @@ def add_poi(request, username):
         form = AddPOIForm(request.POST)
         if form.is_valid():
             #Checks to see if place with same name for same user already exists, error if it does
-            if (Places.objects.filter(user_id=u.id, title=form['title'])): #Do I need form.cleaned_data['title']
+            if (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                     {'error_name': 'Title already taken for this user', \
-                    'index': reverse('wheredoyoulive:index')}) #Should I change where error redirects?
-            address = form['address'].replace(' ', '+') #Changes address into form url query can understand
+                    'index': reverse('wheredoyoulive:user_index', \
+                        args=(username,))})
+            address = form.cleaned_data['address'].replace(' ', '+') #Changes address into form url query can understand
             #Next part gets Json info from google API
-            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=ADDKEY' % address #Replace ADDKEY with key
+            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyCzUxXT3ppgnFHypo_jNUnihhJPY5pqXeg' % address #Replace ADDKEY with key
             data = json.loads(urllib.request.urlopen(url).read())
             coords = data["results"][0]["geometry"]["location"] #Uses format of json response to get info
             #Makes and saves a new place object
-            p = Place(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
+            p = Places(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
             p.save()
             #Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
-                args=(form.cleaned_data['username'],)))
+                args=(username,)))
     else:
         form = AddPOIForm()
     return render(request, 'wheredoyoulive/FormPage.html', \
         {'form': form, \
-         'page': reverse('wheredoyoulive:add_poi')})
+         'page': reverse('wheredoyoulive:add_poi', args=(username,))})
 
 #Removes POI
 def rm_poi(request, username):
     if request.method == 'POST':
         form = RemovePOIForm(request.POST)
         if form.is_valid():
-            p = Places.objects.get(user_id=User(username=username).id, title=form['title'])
+            p = Places.objects.get(user_id=User.objects.get(username=username).id, title=form.cleaned_data['title'])
             p.delete()
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
-                args=(form.cleaned_data['username'],)))
+                args=(username,)))
     else:
         form = RemovePOIForm()
     return render(request, 'wheredoyoulive/FormPage.html', \
         {'form': form, \
-        'index': reverse('wheredoyoulive:rm_poi')})
+        'index': reverse('wheredoyoulive:rm_poi', args=(username,))})
 
 #Updates POI (basically deletes old one and makes a new one, same as updating fields, so a lot is copied from add_poi)
 def upd_poi(request, username):
@@ -175,27 +188,27 @@ def upd_poi(request, username):
         form = AddPOIForm(request.POST)
         if form.is_valid():
             #Checks to make sure poi actually exists
-            if not (Places.objects.filter(user_id=u.id, title=form['title'])):
+            if not (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                               {'error_name': 'No such POI exists', \
                                'index': reverse('wheredoyoulive:index')})
-            p1 = Places.objects.get(user_id=u.id, title=form['title'])
+            p1 = Places.objects.get(user_id=u.id, title=form.cleaned_data['title'])
             p1.delete()
             #Everything after here is straight from add_poi
-            address = form['address'].replace(' ', '+')  # Changes address into form url query can understand
+            address = form.cleaned_data['address'].replace(' ', '+')  # Changes address into form url query can understand
             # Next part gets Json info from google API
-            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=ADDKEY' % address  # Replace ADDKEY with key
+            url = 'https://maps.googleapis.com/maps/api/geocode/json?address=%s&key=AIzaSyCzUxXT3ppgnFHypo_jNUnihhJPY5pqXeg' % address  # Replace ADDKEY with key
             data = json.loads(urllib.request.urlopen(url).read())
             coords = data["results"][0]["geometry"]["location"]  # Uses format of json response to get info
             # Makes and saves a new place object
-            p = Place(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'],
+            p = Places(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'],
                       coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
             p.save()
             # Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
-                                                args=(form.cleaned_data['username'],)))
+                                                args=(username,)))
     else:
         form = AddPOIForm()
     return render(request, 'wheredoyoulive/FormPage.html', \
                   {'form': form, \
-                   'page': reverse('wheredoyoulive:add_poi')})
+                   'page': reverse('wheredoyoulive:upd_poi', args=(username,))})
