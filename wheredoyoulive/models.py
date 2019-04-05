@@ -16,5 +16,6 @@ class User(models.Model):
 class Places(models.Model):
     user_id = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
     coordinate_lat = models.CharField(max_length=100)
     coordinate_long = models.CharField(max_length=100)

@@ -1,6 +1,6 @@
 # Still need to replace ADDKEY with key in AddPOI. I also have some questions in AddPOI
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 
@@ -9,14 +9,16 @@ from .forms import CreateForm, LoginForm, UpdateForm, AddPOIForm, RemovePOIForm
 import urllib.request, json
 import urllib, json
 
-# https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
-# https://docs.djangoproject.com/en/2.1/topics/templates/
-# https://stackoverflow.com/questions/53083880/django-2-reverse-for-index-not-found-index-is-not-a-valid-view-function-o
-# https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
-# https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objects
-# https://developers.google.com/maps/documentation/geocoding/intro#geocoding
-# https://www.powercms.in/blog/how-get-json-data-remote-url-python-script
-
+'''Sources used:
+https://stackoverflow.com/questions/150505/capturing-url-parameters-in-request-get
+https://docs.djangoproject.com/en/2.1/topics/templates/
+https://stackoverflow.com/questions/53083880/django-2-reverse-for-index-not-found-index-is-not-a-valid-view-function-o
+https://stackoverflow.com/questions/38987/how-to-merge-two-dictionaries-in-a-single-expression
+https://docs.djangoproject.com/en/dev/topics/db/queries/#backwards-related-objects
+https://developers.google.com/maps/documentation/geocoding/intro#geocoding
+https://www.powercms.in/blog/how-get-json-data-remote-url-python-script
+https://simpleisbetterthancomplex.com/tutorial/2016/07/27/how-to-return-json-encoded-response.html
+'''
 
 def index(request):
     # if this is a POST request we need to process the form data
@@ -76,7 +78,7 @@ def user_index(request, username):
             {'error_name': 'User does not exist', \
             'index': reverse('wheredoyoulive:index')})
 
-
+#Updates user info
 def update(request, username):
     if (User.objects.filter(username=username)):
         u = User.objects.get(username=username)
@@ -99,14 +101,18 @@ def update(request, username):
             {'error_name': 'User does not exist', \
             'index': reverse('wheredoyoulive:index')})
 
-
-
+#Deletes user
 def delete(request, username):
     u = User.objects.get(username=username)
     u.delete()
     return HttpResponseRedirect(reverse('wheredoyoulive:index'))
 
+#Gets all POIs for a user
+def poi(request, username):
+    pList = list(Places.object.filter(user_id=User.objects.get(username=username).id))
+    return JsonResponse(pList, safe=False)
 
+#Adds POI
 def add_poi(request, username):
     u = User.objects.get(username=username)
     if request.method == 'POST':
@@ -123,7 +129,7 @@ def add_poi(request, username):
             data = json.loads(urllib.request.urlopen(url).read())
             coords = data["results"][0]["geometry"]["location"] #Uses format of json response to get info
             #Makes and saves a new place object
-            p = Place(user_id=u.id, title=form.cleaned_data['title'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
+            p = Place(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
             p.save()
             #Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
@@ -134,7 +140,7 @@ def add_poi(request, username):
         {'form': form, \
          'page': reverse('wheredoyoulive:add_poi')})
 
-
+#Removes POI
 def rm_poi(request, username):
     if request.method == 'POST':
         form = RemovePOIForm(request.POST)
