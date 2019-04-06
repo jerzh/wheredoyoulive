@@ -171,7 +171,12 @@ def rm_poi(request, username):
     if request.method == 'POST':
         form = RemovePOIForm(request.POST)
         if form.is_valid():
-            p = Places.objects.get(user_id=User.objects.get(username=username).id, title=form.cleaned_data['title'])
+            u = User.objects.get(username=username)
+            if not (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
+                return render(request, 'wheredoyoulive/ErrorPage.html', \
+                              {'error_name': 'No such POI exists', \
+                               'index': reverse('wheredoyoulive:user_index', args=(username,))})
+            p = Places.objects.get(user_id=u.id, title=form.cleaned_data['title'])
             p.delete()
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                 args=(username,)))
@@ -191,7 +196,7 @@ def upd_poi(request, username):
             if not (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                               {'error_name': 'No such POI exists', \
-                               'index': reverse('wheredoyoulive:index')})
+                               'index': reverse('wheredoyoulive:user_index', args=(username,))})
             p1 = Places.objects.get(user_id=u.id, title=form.cleaned_data['title'])
             p1.delete()
             #Everything after here is straight from add_poi
