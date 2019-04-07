@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
+# This is also a source:
 # https://stackoverflow.com/questions/17688594/how-to-diff-between-local-uncommitted-changes-and-origin
 
 import os
@@ -112,6 +113,8 @@ postgres://databaseuser:password@localhost:5432/database
 '''
 
 DATABASES = {
+    # basically the database we're going to use is determined by the DATABASE_URL
+    # environment variable (allows for it to work both locally and on Heroku)
     'default': dj_database_url.config(conn_max_age=600, ssl_require=False)
 }
 
@@ -154,5 +157,7 @@ USE_TZ = True
 # https://stackoverflow.com/questions/21141315/django-static-files-on-heroku
 # https://stackoverflow.com/questions/9047054/heroku-handling-static-files-in-django-app
 
+# this is where static files go within apps
 STATIC_URL = '/static/'
+# this is where collectstatic puts the static files
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

@@ -3,6 +3,9 @@ from django.urls import path
 from . import views
 
 app_name = "wheredoyoulive"  # idk if I need this
+# first argument is relative URL; second is the view it corresponds to in
+# views.py; third is the name of the view (necessary for the reverse() function,
+# which is explained in views.py)
 urlpatterns = [
     path('', views.index, name='index'),
     path('make_user', views.make, name='make'),

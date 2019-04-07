@@ -18,10 +18,13 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+# redirects to wheredoyoulive.urls
+# the admin thing is there by default - we didn't use it
 urlpatterns = [
     path('', include('wheredoyoulive.urls')),
     path('admin/', admin.site.urls),
 ]
 
+# StackOverflow said to add this to fix a static files issue (link in settings.py)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

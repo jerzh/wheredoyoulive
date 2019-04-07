@@ -23,20 +23,29 @@ https://stackoverflow.com/questions/20168582/programmingerror-column-genre-id-of
 https://stackoverflow.com/questions/50236117/scraping-ssl-certificate-verify-failed-error-for-http-en-wikipedia-org
 '''
 
+# this is the basic structure for rendering and processing forms: most other
+# pages are a variation on this (to avoid repetitiveness, comments explaining
+# form code will be omitted for other pages)
 def index(request):
-    # if this is a POST request we need to process the form data
+    # if this is a POST request, process form data
     if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
+        # stick the data into a form object
         form = LoginForm(request.POST)
-        # check whether it's valid:
+        # check whether it's valid
         if form.is_valid():
-            # process the data in form.cleaned_data as require
-            # redirect to a new URL:
+            # the data is in form.cleaned_data
+            # redirect to user homepage (will check there whether user exists)
+            # args=(form.cleaned_data['username'],) is to tell the user_index
+            # page which user it is
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                 args=(form.cleaned_data['username'],)))
-    # if a GET (or any other method) we'll create a blank form
+    # if a GET (or any other method) create a blank form
     else:
         form = LoginForm()
+    # render the page (the third parameter is a dict of variable definitions;
+    # for example form replaces the {{ form }} variable in homepage.html)
+    # reverse takes the name of a page and outputs its URL; avoids hard-coding
+    # URLs
     return render(request, 'wheredoyoulive/homepage.html', \
         {'form': form, \
         'make': reverse('wheredoyoulive:make'), \
@@ -44,6 +53,7 @@ def index(request):
 
 #Shows all users
 def show_users(request):
+    # list with the properties of every user
     uList = list(User.objects.all().values())
     return render(request, 'wheredoyoulive/listpage.html', \
         {'obj_list': uList, \
@@ -57,14 +67,16 @@ def make(request):
             username = form.cleaned_data['username']
             #Makes sure username not already taken
             if (User.objects.filter(username=username)):
+                # if it is, redirect to error page
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                     {'error_name': 'Username already taken', \
                     'index': reverse('wheredoyoulive:index')})
             else:
-                #Initializes home location to (0, 0), have to update this
+                # create new user
                 u = User(username=username, name=form.cleaned_data['name'], \
                     latitude=form.cleaned_data['latitude'], \
                     longitude=form.cleaned_data['longitude'])
+                # gotta save manually
                 u.save()
                 return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                     args=(username,)))
@@ -76,7 +88,9 @@ def make(request):
 
 #Homepage for a user, has links to many useful features
 def user_index(request, username):
+    # check if user exists
     if (User.objects.filter(username=username)):
+        # get user object
         u = User.objects.get(username=username)
         return render(request, 'wheredoyoulive/userpage.html', \
             {'username': username, \
@@ -90,17 +104,21 @@ def user_index(request, username):
             'view_poi': reverse('wheredoyoulive:poi', args=(username,)), \
             'update_poi': reverse('wheredoyoulive:upd_poi', args=(username,))})
     else:
+        # redirect to error page
         return render(request, 'wheredoyoulive/ErrorPage.html', \
             {'error_name': 'User does not exist', \
             'index': reverse('wheredoyoulive:index')})
 
 #Updates user info
 def update(request, username):
+    # check if user exists
     if (User.objects.filter(username=username)):
+        # get user object
         u = User.objects.get(username=username)
         if request.method == 'POST':
             form = UpdateForm(request.POST)
             if form.is_valid():
+                # set properties of user (overwrites previous)
                 u.name = form.cleaned_data['name']
                 u.latitude = form.cleaned_data['latitude']
                 u.longitude = form.cleaned_data['longitude']
@@ -113,11 +131,13 @@ def update(request, username):
                 {'form': form, \
                 'page': reverse('wheredoyoulive:update', args=(username,))})
     else:
+        # redirect to error page
         return render(request, 'wheredoyoulive/ErrorPage.html', \
             {'error_name': 'User does not exist', \
             'index': reverse('wheredoyoulive:index')})
 
 #Deletes user
+# pretty straightforward: get user object and delete
 def delete(request, username):
     u = User.objects.get(username=username)
     u.delete()
@@ -125,6 +145,7 @@ def delete(request, username):
 
 #Shows all POIs (POI stands for Point of Interest)
 def show_pois(request):
+    # list with the properties of every POI
     pList = list(Places.objects.all().values())
     return render(request, 'wheredoyoulive/listpage.html', \
         {'obj_list': pList, \
@@ -132,6 +153,7 @@ def show_pois(request):
 
 #Gets all POIs for a user
 def poi(request, username):
+    # list with the properties of every POI belonging to username
     pList = list(Places.objects.filter(user_id=User.objects.get(username=username).id).values())
     return render(request, 'wheredoyoulive/listpage.html', \
         {'obj_list': pList, \
@@ -139,6 +161,8 @@ def poi(request, username):
 
 #Adds POI
 def add_poi(request, username):
+    # get user object (we already know it exists because this page is only
+    # reachable from user_index; I guess you could manually type in the URL but why)
     u = User.objects.get(username=username)
     if request.method == 'POST':
         form = AddPOIForm(request.POST)
@@ -157,7 +181,7 @@ def add_poi(request, username):
             #Makes and saves a new place object
             p = Places(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'], coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
             p.save()
-            #Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
+            #Takes back to user home
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                 args=(username,)))
     else:
@@ -171,11 +195,14 @@ def rm_poi(request, username):
     if request.method == 'POST':
         form = RemovePOIForm(request.POST)
         if form.is_valid():
+            # get user object
             u = User.objects.get(username=username)
+            #Checks to see if place with same name for same user already exists, error if it does
             if not (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                               {'error_name': 'No such POI exists', \
                                'index': reverse('wheredoyoulive:user_index', args=(username,))})
+            # get POI object and delete
             p = Places.objects.get(user_id=u.id, title=form.cleaned_data['title'])
             p.delete()
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
@@ -188,15 +215,17 @@ def rm_poi(request, username):
 
 #Updates POI (basically deletes old one and makes a new one, same as updating fields, so a lot is copied from add_poi)
 def upd_poi(request, username):
+    # get user object
     u = User.objects.get(username=username)
     if request.method == 'POST':
         form = AddPOIForm(request.POST)
         if form.is_valid():
-            #Checks to make sure poi actually exists
+            #Checks to make sure POI actually exists
             if not (Places.objects.filter(user_id=u.id, title=form.cleaned_data['title'])):
                 return render(request, 'wheredoyoulive/ErrorPage.html', \
                               {'error_name': 'No such POI exists', \
                                'index': reverse('wheredoyoulive:user_index', args=(username,))})
+            # get old POI object and delete
             p1 = Places.objects.get(user_id=u.id, title=form.cleaned_data['title'])
             p1.delete()
             #Everything after here is straight from add_poi
@@ -209,7 +238,7 @@ def upd_poi(request, username):
             p = Places(user_id=u.id, title=form.cleaned_data['title'], address=form.cleaned_data['address'],
                       coordinate_lat=coords["lat"], coordinate_long=coords["lng"])
             p.save()
-            # Do we want to have a page that tells you you added a POI successfully? Do we have that? For now just takes back to user home
+            #Takes back to user home
             return HttpResponseRedirect(reverse('wheredoyoulive:user_index', \
                                                 args=(username,)))
     else:
