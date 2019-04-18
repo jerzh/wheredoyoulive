@@ -90,10 +90,12 @@ https://superuser.com/questions/553045/fatal-lock-file-postmaster-pid-already-ex
 https://stackoverflow.com/questions/5598517/find-the-host-name-and-port-using-psql-commands
 https://stackoverflow.com/questions/29937378/django-db-utils-operationalerror-could-not-connect-to-server
 https://stackoverflow.com/questions/35455109/cant-run-the-server-on-django-connection-refused
-https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python
+https://devcenter.heroku.com/articles/heroku-postgresql
 https://stackoverflow.com/questions/3582552/postgresql-connection-url
 https://stackoverflow.com/questions/30897442/django-1-8-fails-to-django-db-utils-programmingerror-relation-auth-user-does
 https://stackoverflow.com/questions/5189560/squash-my-last-x-commits-together-using-git
+https://dba.stackexchange.com/questions/36870/permission-denied-in-postgres
+https://www.postgresql.org/docs/9.1/ddl-schemas.html
 
 instructions:
 > install postgres, psycopg2, dj_database_url
@@ -110,6 +112,18 @@ GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
 > set the environment variable DATABASE_URL to
 postgres://databaseuser:password@localhost:5432/database
 > now python manage.py runserver should be good! yay
+
+additional note:
+> if you want to pull the database from the server by running
+heroku pg:pull DATABASE database
+> you have to 1) drop your local table if it already exists with
+psql
+DROP DATABASE database;
+\q
+> and 2) run the above commands starting from psql database, except instead of
+GRANT ALL PRIVILEGES ON DATABASE database TO databaseuser;
+> which only works for empty databases, run
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO databaseuser;
 '''
 
 DATABASES = {
